@@ -82,7 +82,7 @@ local FileHandler = {}; do
 
         warn("Loaded file: "..Path);
 
-        loadfile(Path)();
+        return loadfile(Path)();
     end;
 
     function FileHandler:Delete(Path: string)
