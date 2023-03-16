@@ -1,69 +1,43 @@
 --<< AlphaZero v2 Loader >>--
+if typeof(syn) == "table" and gethui then
+    syn.protect_gui = not gethui and syn.protect_gui or function(Instance) Instance.Parent = gethui() end;
+end
+
 if not game:IsLoaded() then
     game.Loaded:Wait();
 end
 
---<< PlaceIds >>--
-local PlaceIds = loadstring(game:HttpGetAsync(("https://github.com/Uvxtq/AlphaZero/blob/main/Games/PlaceIds.lua?raw=true")))();
+--<< Handlers >>--
+local LoadHandler = loadstring(game:HttpGet(("https://github.com/Uvxtq/AlphaZero/blob/main/Handlers/Load%20Handler.lua?raw=true")))();
+local File = LoadHandler("File");
+local Notify = LoadHandler("Notification");
+
+File:Setup("AlphaZero", "1.0.0", {
+    "Games",
+})
+
+File:Download("AlphaZero/Games/PlaceIds.lua", "https://github.com/Uvxtq/AlphaZero/blob/main/Games/PlaceIds.lua?raw=true");
+File:Download("AlphaZero/Loader.lua", "https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Loader.lua");
+File:Download("AlphaZero/Universal.lua", "https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Games/Universal.lua");
 
 --<< Services >>--
 local Players = cloneref(game:GetService("Players"));
 local LocalPlayer = Players.LocalPlayer;
 local MarketplaceService = cloneref(game:GetService("MarketplaceService"));
-local StarterGui = cloneref(game:GetService("StarterGui"));
 
 --<< Variables >>--
-local Exploit = identifyexecutor and table.concat({identifyexecutor()}, " ") or "Unknown";
 local GameName = MarketplaceService:GetProductInfo(game.PlaceId).Name;
-local ToastTypes = {
-    ["None"] = 0,
-    ["Success"] = 1,
-    ["Warning"] = 2,
-    ["Error"] = 3,
-    ["Info"] = 4
-};
-
---<< Functions >>--
-local function CheckExecutor(Name)
-    if Exploit:gmatch("/") then
-        Exploit = Exploit:split("/")[1];
-    end
-
-    if Exploit:lower():match(Name:lower()) then
-        return true;
-    end
-
-    return false;
-end
-
-local function Notify(Type, Title, Content, Duration, IconColor)
-    assert(ToastTypes[Type], "Invalid toast type");
-
-    if CheckExecutor("Synapse X v3") then
-        return syn.toast_notification({
-            Type = ToastTypes[Type],
-            Duration = Duration or 5,
-            Title = Title,
-            Content = Content,
-            IconColor = IconColor
-        })
-    end
-
-    return StarterGui:SetCore("SendNotification", {
-        Title = Title,
-        Text = Content,
-        Duration = Duration
-    })
-end
 
 local function GetGameFromPlaceId()
-    for Game, PlaceId in next, PlaceIds do
+    local Games = File:Load("AlphaZero/Games/PlaceIds.lua");
+
+    for Game, PlaceId in next, Games do
         if PlaceId == game.PlaceId then
             return Game;
         end
     end
 
-    return nil, "Game not found";
+    return false, "Game not found";
 end
 
 --<< Main >>--
@@ -73,7 +47,7 @@ if not Game then
     warn(Error);
     Notify("Info", "Unknown Game", "Game not found, loading universal script");
 
-    loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Games/Universal.lua")))();
+    File:Load("AlphaZero/Universal.lua");
     return;
 end
 
