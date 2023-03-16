@@ -109,7 +109,7 @@ local FileHandler = {}; do
         if self:Exists(Path) then
             local Content = self:Read(Path)
 
-            if #Content >= #game:HttpGet(Url) then
+            if #Content == #game:HttpGet(Url) then
                 warn("No changes have been made, not downloading: "..Path.." ("..Url..")");
                 return;
             end
