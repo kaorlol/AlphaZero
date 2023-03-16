@@ -15,7 +15,7 @@ local FileHandler = {}; do
 
             self:Write(Hub.."/Version.txt", Version);
 
-            warn("Finished setting up file handler: "..Hub);
+            warn("Completed setup of file handler: "..Hub);
 
             return;
         else
@@ -110,7 +110,8 @@ local FileHandler = {}; do
             local Content = self:Read(Path)
 
             if #Content == #game:HttpGet(Url) then
-                warn("No changes have been made, not downloading: "..Path.." ("..Url..")");
+                warn("No changes have been made to " .. Path)
+
                 return;
             end
         end
@@ -120,7 +121,7 @@ local FileHandler = {}; do
         self:Write(Path, game:HttpGet(Url));
     end;
 
-    function FileHandler:GetDirectory(Folder: string)
+    function FileHandler:GetFilesFrom(Folder: string)
         assert(typeof(Folder) == "string", "Folder must be a string");
 
         local Response = game:HttpGetAsync(Folder);
