@@ -106,6 +106,15 @@ local FileHandler = {}; do
         assert(typeof(Path) == "string", "Path must be a string");
         assert(typeof(Url) == "string", "Url must be a string");
 
+        if self:Exists(Path) then
+            local Content = self:Read(Path)
+
+            if #Content > game:HttpGet(Url) then
+                warn("No changes have been made, not downloading: "..Path.." ("..Url..")");
+                return;
+            end
+        end
+
         warn("Downloaded file: "..Path.." ("..Url..")");
 
         self:Write(Path, game:HttpGet(Url));
