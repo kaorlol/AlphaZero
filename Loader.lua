@@ -7,18 +7,35 @@ if not game:IsLoaded() then
     game.Loaded:Wait();
 end
 
+warn("--<< AlphaZero v2 Loader >>--")
+
 --<< Handlers >>--
-local LoadHandler = loadstring(game:HttpGet(("https://github.com/Uvxtq/AlphaZero/blob/main/Handlers/Load%20Handler.lua?raw=true")))();
+local LoadHandler = loadstring(game:HttpGet(("https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Handlers/Load%20Handler.lua")))();
 local File = LoadHandler("File");
 local Notify = LoadHandler("Notification");
+
+Notify("Info", "[AlphaZero v2]", "Setting up file handler. (1/3)", 5);
 
 File:Setup("AlphaZero", "1.0.0", {
     "Games",
 })
 
-File:Download("AlphaZero/Games/PlaceIds.lua", "https://github.com/Uvxtq/AlphaZero/blob/main/Games/PlaceIds.lua?raw=true");
+Notify("Info", "[AlphaZero v2]", "Downloading files. (2/3)", 5);
+
+File:Download("AlphaZero/Games/PlaceIds.lua", "https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Games/PlaceIds.lua");
 File:Download("AlphaZero/Loader.lua", "https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Loader.lua");
 File:Download("AlphaZero/Universal.lua", "https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Games/Universal.lua");
+
+for _, Game in next, File:GetFilesFrom("https://github.com/Uvxtq/AlphaZero/tree/main/Games") do
+    local Name = Game:match("([^/]+)$");
+    local Url = string.format("https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Games/%s", Name);
+
+    if Name ~= "PlaceIds.lua" and Name ~= "Universal.lua" then
+        File:Download(string.format("AlphaZero/Games/%s", Name), Url);
+    end
+end
+
+Notify("Info", "[AlphaZero v2]", "Finished setting up loader. (3/3)", 5);
 
 --<< Services >>--
 local Players = cloneref(game:GetService("Players"));
@@ -37,26 +54,23 @@ local function GetGameFromPlaceId()
         end
     end
 
-    return false, "Game not found";
+    return false;
 end
 
 --<< Main >>--
-local Game, Error = GetGameFromPlaceId();
+local Game = GetGameFromPlaceId();
 
 if not Game then
-    warn(Error);
-    Notify("Info", "Unknown Game", "Game not found, loading universal script");
+    Notify("Info", "Unknown Game", "Game not found, loading universal script.", 5);
 
     File:Load("AlphaZero/Universal.lua");
+
+    Notify("Info", "[AlphaZero v2]", "Loaded universal script.", 5);
     return;
 end
 
-local Success, Script = pcall(game.HttpGet, game, string.format("https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Games/%s.lua", Game));
+Notify("Info", "[AlphaZero v2]", string.format("Loading script for %s.", GameName), 5);
 
-if Success then
-    Notify("Info", "Game", string.format("Loading %s", GameName));
-    loadstring(Script)();
-    Notify("Success", "Game", string.format("Loaded %s", GameName));
-else
-    LocalPlayer:Kick(string.format("Failed to load %s", GameName));
-end
+File:Load(string.format("AlphaZero/Games/%s.lua", Game));
+
+Notify("Info", "[AlphaZero v2]", "Loaded script.", 5);
