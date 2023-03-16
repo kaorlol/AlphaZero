@@ -1,7 +1,3 @@
-local function GetFileNameFromPath(Path)
-    return Path:match("^.+/(.+)$");
-end
-
 local FileHandler = {}; do
     function FileHandler:Setup(Hub: string, Version: string, Subfolders: table)
         assert(typeof(Hub) == "string", "Hub must be a string");
@@ -36,7 +32,7 @@ local FileHandler = {}; do
 
                 for _, Subfolder in next, Subfolders do
                     if isfolder(Hub.."/"..Subfolder) then
-                        delfolder(Hub.."/"..Subfolder);
+                        self:Delete(Hub.."/"..Subfolder);
                     end
 
                     makefolder(Hub.."/"..Subfolder);
@@ -49,7 +45,6 @@ local FileHandler = {}; do
         assert(typeof(Path) == "string", "Path must be a string");
         assert(typeof(Content) == "string" or typeof(Content) == "number", "Content must be a string or number");
         assert(not isfolder(Path), "Cannot write to a folder");
-
 
         writefile(Path, Content);
     end;
@@ -64,6 +59,46 @@ local FileHandler = {}; do
         end
 
         appendfile(Path, Content);
+    end;
+
+    function FileHandler:Read(Path: string)
+        assert(typeof(Path) == "string", "Path must be a string");
+        assert(not isfolder(Path), "Cannot read a folder");
+        assert(isfile(Path), "File does not exist");
+
+        return readfile(Path);
+    end;
+
+    function FileHandler:Load(Path: string)
+        assert(typeof(Path) == "string", "Path must be a string");
+        assert(not isfolder(Path), "Cannot load a folder");
+        assert(isfile(Path), "File does not exist");
+
+        return loadfile(Path)();
+    end;
+
+    function FileHandler:Delete(Path: string)
+        assert(typeof(Path) == "string", "Path must be a string");
+        assert(isfile(Path) or isfolder(Path), "File or folder does not exist");
+
+        if isfile(Path) then
+            delfile(Path);
+        else
+            delfolder(Path);
+        end
+    end;
+
+    function FileHandler:Exists(Path: string)
+        assert(typeof(Path) == "string", "Path must be a string");
+
+        return isfile(Path) or isfolder(Path);
+    end;
+
+    function FileHandler:Download(Path: string, Url: string)
+        assert(typeof(Path) == "string", "Path must be a string");
+        assert(typeof(Url) == "string", "Url must be a string");
+
+        self:Write(Path, game:HttpGet(Url));
     end;
 end
 
