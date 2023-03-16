@@ -119,6 +119,21 @@ local FileHandler = {}; do
 
         self:Write(Path, game:HttpGet(Url));
     end;
+
+    function FileHandler:GetDirectory(Folder: string)
+        assert(typeof(Folder) == "string", "Folder must be a string");
+
+        local Response = game:HttpGetAsync(Folder);
+        local Files = {};
+
+        for File in string.gmatch(Response, 'href="([^"]+)"') do
+            if string.find(File, "blob") then
+                table.insert(Files, File);
+            end
+        end
+
+        return Files;
+    end;
 end
 
 return FileHandler;
