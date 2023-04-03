@@ -8,12 +8,11 @@ local function TableLength(Table: table)
     return Count;
 end
 
-local function GetLastCommit()
-    local Response = game:HttpGetAsync("https://api.github.com/repos/Uvxtq/AlphaZero/branches/main");
-    local Data = game:GetService("HttpService"):JSONDecode(Response);
 
-    return Data.commit.sha;
-end
+local Response = game:HttpGetAsync("https://api.github.com/repos/Uvxtq/AlphaZero/branches/main");
+local Data = game:GetService("HttpService"):JSONDecode(Response);
+
+local GetLastCommit = Data.commit.sha;
 
 local FileHandler = { QueuedDownloads = {} }; do
     function FileHandler:Setup(Hub: string, Version: string, Subfolders: table)
@@ -27,7 +26,7 @@ local FileHandler = { QueuedDownloads = {} }; do
             end
 
             self:Write(Hub.."/Version.txt", Version);
-            self:Write(Hub.."/LastCommit.txt", GetLastCommit());
+            self:Write(Hub.."/LastCommit.txt", GetLastCommit);
 
             warn("Completed setup of file handler: "..Hub);
 
@@ -43,7 +42,7 @@ local FileHandler = { QueuedDownloads = {} }; do
         local VersionFile = Hub.."/Version.txt";
         local CommitFile = Hub.."/LastCommit.txt";
 
-        if not isfile(CommitFile) then self:Write(CommitFile, GetLastCommit()); end
+        if not isfile(CommitFile) then self:Write(CommitFile, GetLastCommit); end
 
         if not isfile(VersionFile) then
             self:Write(VersionFile, Version);
@@ -102,7 +101,7 @@ local FileHandler = { QueuedDownloads = {} }; do
         if self:Exists(Path) then
             local LastCommit = self:Read("AlphaZero/LastCommit.txt");
 
-            if LastCommit == GetLastCommit() then
+            if LastCommit == GetLastCommit then
                 warn("No changes have been made to " .. Path)
 
                 return;
@@ -126,7 +125,7 @@ local FileHandler = { QueuedDownloads = {} }; do
         end
 
         if TableLength(self.QueuedDownloads) == 0 then
-            self:Write("AlphaZero/LastCommit.txt", GetLastCommit());
+            self:Write("AlphaZero/LastCommit.txt", GetLastCommit);
         end
     end;
 
