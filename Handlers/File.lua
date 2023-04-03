@@ -31,6 +31,9 @@ local FileHandler = {}; do
         end
 
         local VersionFile = Hub.."/Version.txt";
+        local CommitFile = Hub.."/LastCommit.txt";
+
+        if not isfile(CommitFile) then self:Write(CommitFile, GetLastCommit()); end
 
         if not isfile(VersionFile) then
             self:Write(VersionFile, Version);
@@ -87,7 +90,6 @@ local FileHandler = {}; do
 
     function FileHandler:Download(Path: string, Url: string)
         if self:Exists(Path) then
-            local Content = self:Read(Path)
             local LastCommit = self:Read("AlphaZero/LastCommit.txt");
 
             if LastCommit ~= GetLastCommit() then
@@ -97,9 +99,10 @@ local FileHandler = {}; do
             end
         end
 
-        warn("Downloaded file: "..Path.." ("..Url..")");
-
+        self:Write("AlphaZero/LastCommit.txt", GetLastCommit());
         self:Write(Path, game:HttpGet(Url));
+
+        warn("Downloaded file: "..Path.." ("..Url..")");
     end;
 
     function FileHandler:GetFilesFrom(Folder: string)
