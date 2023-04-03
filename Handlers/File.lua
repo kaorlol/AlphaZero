@@ -1,3 +1,13 @@
+local function TableLength(Table: table)
+    local Count = 0;
+
+    for _ in next, Table do
+        Count += 1;
+    end
+
+    return Count;
+end
+
 local function GetLastCommit()
     local Response = game:HttpGetAsync("https://api.github.com/repos/Uvxtq/AlphaZero/branches/main");
     local Data = game:GetService("HttpService"):JSONDecode(Response);
@@ -5,7 +15,7 @@ local function GetLastCommit()
     return Data.commit.sha;
 end
 
-local FileHandler = {}; do
+local FileHandler = { QueuedDownloads = {} }; do
     function FileHandler:Setup(Hub: string, Version: string, Subfolders: table)
         warn("Setting up file handler: "..Hub);
 
@@ -92,17 +102,32 @@ local FileHandler = {}; do
         if self:Exists(Path) then
             local LastCommit = self:Read("AlphaZero/LastCommit.txt");
 
-            if LastCommit ~= GetLastCommit() then
+            if LastCommit == GetLastCommit() then
                 warn("No changes have been made to " .. Path)
 
                 return;
             end
         end
 
-        self:Write("AlphaZero/LastCommit.txt", GetLastCommit());
         self:Write(Path, game:HttpGet(Url));
 
         warn("Downloaded file: "..Path.." ("..Url..")");
+    end;
+
+    function FileHandler:QueueDownload(Path: string, Url: string)
+        self.QueuedDownloads[Path] = Url;
+    end;
+
+    function FileHandler:DownloadQueued()
+        for Path, Url in next, self.QueuedDownloads do
+            self:Download(Path, Url);
+
+            self.QueuedDownloads[Path] = nil;
+        end
+
+        if TableLength(self.QueuedDownloads) == 0 then
+            self:Write("AlphaZero/LastCommit.txt", GetLastCommit());
+        end
     end;
 
     function FileHandler:GetFilesFrom(Folder: string)
