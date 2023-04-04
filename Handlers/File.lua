@@ -90,7 +90,7 @@ local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
         return readfile(Path);
     end;
 
-    function FileHandler:Load(Path: string, IsScript)
+    function FileHandler:Load(Path: string, IsScript: boolean)
         warn("Loaded file: "..Path);
 
         if IsScript then
@@ -112,7 +112,7 @@ local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
         return isfile(Path) or isfolder(Path);
     end;
 
-    function FileHandler:Download(Path: string, Url: string)
+    function FileHandler:Download(Path: string, Url: string, IsLoader: boolean)
         if self:Exists(Path) then
             local LastCommit = self:Read(self.Hub.."/LastCommit.txt");
 
@@ -123,18 +123,26 @@ local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
             end
         end
 
+        if IsLoader then
+            self:Write(Path, game:HttpGet(Url));
+
+            warn("Downloaded file: "..Path.." ("..Url..")");
+
+            return;
+        end
+
         self:Write(Path, syn.crypt.base64.encode(game:HttpGet(Url)));
 
         warn("Downloaded file: "..Path.." ("..Url..")");
     end;
 
-    function FileHandler:QueueDownload(Path: string, Url: string)
-        self.QueuedDownloads[Path] = Url;
+    function FileHandler:QueueDownload(Path: string, Url: string, IsLoader: boolean)
+        self.QueuedDownloads[Path] = Url.."|"..tostring(IsLoader);
     end;
 
     function FileHandler:DownloadQueued()
         for Path, Url in next, self.QueuedDownloads do
-            self:Download(Path, Url);
+            self:Download(Path, Url:split("|")[1], Url:split("|")[2] == "true");
 
             self.QueuedDownloads[Path] = nil;
         end
