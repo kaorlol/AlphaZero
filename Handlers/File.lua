@@ -59,13 +59,13 @@ local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
             self:Write(VersionFile, Version);
         else
             if readfile(VersionFile) ~= Version then
+                self:Delete(Hub);
+
+                makefolder(Hub);
+
                 self:Write(VersionFile, Version);
 
                 for _, Subfolder in next, Subfolders do
-                    if self:Exists(Hub.."/"..Subfolder) then
-                        self:Delete(Hub.."/"..Subfolder);
-                    end
-
                     makefolder(Hub.."/"..Subfolder);
                 end
             end
