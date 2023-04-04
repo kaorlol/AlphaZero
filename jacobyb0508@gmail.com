@@ -21,7 +21,7 @@ File:Setup("AlphaZero", "1.0.0", {
 
 Notify("Info", "[AlphaZero v2]", "Downloading files... (2/3)", 5);
 
-File:QueueDownload("AlphaZero/Loader.lua", "https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Loader.lua");
+File:QueueDownload("AlphaZero/Loader.lua", "https://raw.githubusercontent.com/Uvxtq/AlphaZero/main/Loader.lua", true);
 
 for _, Game in next, File:GetFilesFrom("https://github.com/Uvxtq/AlphaZero/tree/main/Games") do
     local Name = Game:match("([^/]+)$");
