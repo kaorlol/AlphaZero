@@ -1,3 +1,11 @@
+if typeof(syn) ~= "table" and Krnl.Base64.Decode then
+    syn.crypt.base64.encode = Krnl.Base64.Encode;
+    syn.crypt.base64.decode = Krnl.Base64.Decode;
+elseif typeof(syn) ~= "table" and crypt.base64encode then
+    syn.crypt.base64.encode = crypt.base64encode;
+    syn.crypt.base64.decode = crypt.base64decode;
+end
+
 local function TableLength(Table: table)
     local Count = 0;
 
