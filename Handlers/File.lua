@@ -8,14 +8,14 @@ local function TableLength(Table: table)
     return Count;
 end
 
+local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
+    function FileHandler:Setup(Hub: string, Version: string, HubData: table, Subfolders: table)
+        local Response = game:HttpGetAsync(string.format("https://api.github.com/repos/%s/%s/branches/main", HubData.Owner, HubData.Repo));
+        local Data = game:GetService("HttpService"):JSONDecode(Response);
 
-local Response = game:HttpGetAsync("https://api.github.com/repos/Uvxtq/AlphaZero/branches/main");
-local Data = game:GetService("HttpService"):JSONDecode(Response);
+        self.LastCommitSha = Data.commit.sha;
+        self.Hub = Hub;
 
-local GetLastCommit = Data.commit.sha;
-
-local FileHandler = { QueuedDownloads = {} }; do
-    function FileHandler:Setup(Hub: string, Version: string, Subfolders: table)
         warn("Setting up file handler: "..Hub);
 
         if not isfolder(Hub) then
@@ -26,7 +26,7 @@ local FileHandler = { QueuedDownloads = {} }; do
             end
 
             self:Write(Hub.."/Version.txt", Version);
-            self:Write(Hub.."/LastCommit.txt", GetLastCommit);
+            self:Write(Hub.."/LastCommit.txt", self.LastCommitSha);
 
             warn("Completed setup of file handler: "..Hub);
 
@@ -42,7 +42,7 @@ local FileHandler = { QueuedDownloads = {} }; do
         local VersionFile = Hub.."/Version.txt";
         local CommitFile = Hub.."/LastCommit.txt";
 
-        if not isfile(CommitFile) then self:Write(CommitFile, GetLastCommit); end
+        if not isfile(CommitFile) then self:Write(CommitFile, self.LastCommitSha); end
 
         if not isfile(VersionFile) then
             self:Write(VersionFile, Version);
@@ -79,8 +79,12 @@ local FileHandler = { QueuedDownloads = {} }; do
         return readfile(Path);
     end;
 
-    function FileHandler:Load(Path: string)
+    function FileHandler:Load(Path: string, IsScript)
         warn("Loaded file: "..Path);
+
+        if IsScript then
+            return loadstring(syn.crypt.base64.decode(readfile(Path)))();
+        end
 
         return loadfile(Path)();
     end;
@@ -99,16 +103,16 @@ local FileHandler = { QueuedDownloads = {} }; do
 
     function FileHandler:Download(Path: string, Url: string)
         if self:Exists(Path) then
-            local LastCommit = self:Read("AlphaZero/LastCommit.txt");
+            local LastCommit = self:Read(self.Hub.."/LastCommit.txt");
 
-            if LastCommit == GetLastCommit then
+            if LastCommit == self.LastCommitSha then
                 warn("No changes have been made to " .. Path)
 
                 return;
             end
         end
 
-        self:Write(Path, game:HttpGet(Url));
+        self:Write(Path, syn.crypt.base64.encode(game:HttpGet(Url)));
 
         warn("Downloaded file: "..Path.." ("..Url..")");
     end;
@@ -125,7 +129,7 @@ local FileHandler = { QueuedDownloads = {} }; do
         end
 
         if TableLength(self.QueuedDownloads) == 0 then
-            self:Write("AlphaZero/LastCommit.txt", GetLastCommit);
+            self:Write(self.Hub.."/LastCommit.txt", self.LastCommitSha);
         end
     end;
 
