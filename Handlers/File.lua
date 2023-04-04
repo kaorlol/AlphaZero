@@ -9,7 +9,10 @@ local function TableLength(Table: table)
 end
 
 local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
-    function FileHandler:Setup(Hub: string, Version: string, HubData: table, Subfolders: table)
+    function FileHandler:Setup(Hub: string, Version: string, SetupData: table)
+        local Subfolders = SetupData.Subfolders;
+        local HubData = SetupData.HubData;
+
         local Response = game:HttpGetAsync(string.format("https://api.github.com/repos/%s/%s/branches/main", HubData.Owner, HubData.Repo));
         local Data = game:GetService("HttpService"):JSONDecode(Response);
 
