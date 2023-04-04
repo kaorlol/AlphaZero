@@ -1,11 +1,3 @@
-if typeof(syn) ~= "table" and Krnl.Base64.Decode then
-    syn.crypt.base64.encode = Krnl.Base64.Encode;
-    syn.crypt.base64.decode = Krnl.Base64.Decode;
-elseif typeof(syn) ~= "table" and crypt.base64encode then
-    syn.crypt.base64.encode = crypt.base64encode;
-    syn.crypt.base64.decode = crypt.base64decode;
-end
-
 local function TableLength(Table: table)
     local Count = 0;
 
@@ -93,10 +85,6 @@ local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
     function FileHandler:Load(Path: string, IsScript: boolean)
         warn("Loaded file: "..Path);
 
-        if IsScript then
-            return loadstring(syn.crypt.base64.decode(readfile(Path)))();
-        end
-
         return loadfile(Path)();
     end;
 
@@ -131,7 +119,7 @@ local FileHandler = { QueuedDownloads = {}, Hub = nil, LastCommitSha = nil }; do
             return;
         end
 
-        self:Write(Path, syn.crypt.base64.encode(game:HttpGet(Url)));
+        self:Write(Path, game:HttpGet(Url));
 
         warn("Downloaded file: "..Path.." ("..Url..")");
     end;
