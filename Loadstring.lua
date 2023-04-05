@@ -1,5 +1,3 @@
-local StartTime = tick();
-
 if isfile("AlphaZero/Loader.lua") then
     loadfile("AlphaZero/Loader.lua")()
 else
@@ -11,5 +9,3 @@ else
         cloneref(game:GetService("Players")).LocalPlayer:Kick("Failed to grab loader, join the discord for support.");
     end
 end
-
-print(string.format("AlphaZero v2 took %.2f second(s) to load.", tick() - StartTime));
